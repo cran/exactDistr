@@ -38,20 +38,56 @@ evaluated using the Shift-Algorithm by Streitberg and R\"ohmel.
 
 \examples{
 
-# compute the distribution of the Wilcoxon-Test using the algorithm
-
-x <- c(0.5, 0.6, 0.7, 0.8)
-y <- c(1.1, 1.2, 1.4, 1.6)
-r <- rank(c(x,y))
-dexact <- dperm(10:26, r, 4)	# Attention: this is the Wilcoxon NOT U
-dexact == dwilcox(0:16, 4, 4) 
-
 # exact p-value of the Wilcoxon test for a tied sample
 
 x <- c(0.5, 0.5, 0.6, 0.6, 0.7, 0.8, 0.9)
 y <- c(0.5, 1.0, 1.2, 1.2, 1.4, 1.5, 1.9, 2.0)
 r <- rank(c(x,y))
 pexact <- pperm(sum(r[seq(along=x)]), r, 7)
+
+# Compare the exact algorithm as implemented in ctest and the
+# Streitberg-Roehmel for untied samples
  
+# Wilcoxon:
+
+x <- rnorm(10, 2)
+y <- rnorm(10, 3)
+r <- rank(c(x,y))
+
+# exact distribution using Streitberg-Roehmel
+
+dwexac <- dperm(0:100, r, 10)
+sum(dwexac)                             # should be something near 1 :-)
+tr <- which(dwexac > 0)
+
+# exact distribution using dwilcox
+
+dw <- dwilcox(0:100, 10, 10)
+
+# compare the two distributions:
+
+plot(dw[tr - 10*11/2], dwexac[tr])      # should give a "perfect" line
+
+# Ansari-Bradley
+
+x <- rnorm(10, 2, 1)
+y <- rnorm(10, 2, 2)
+
+# exact distribution using Streitberg-Roehmel
+
+r <- rank(c(x,y))
+sc <- pmin(r, 20 - r +1)
+dabexac <- dperm(0:100, sc, 10)
+sum(dabexac)
+tr <- which(dabexac > 0)
+
+# exact distribution using dansari (wrapper to ansari.c in ctest)
+
+dab <- dansari(0:100, 10, 10)
+
+# compare the two distributions:
+
+plot(dab[tr], dabexac[tr])
+
 }
 \keyword{exact distribution}

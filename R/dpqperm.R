@@ -23,7 +23,7 @@ dperm <- function(x, scores, m)
 
 pperm <- function(q, scores, m)
 {
-	if (length(q) != 1) stop("x is not a real number")
+	if (length(q) != 1) stop("q is not a real number")
         if (q < 0) return(0)
         eq <- equiscores(scores)
         cp <- cperm(eq, m)
@@ -89,10 +89,6 @@ cperm <- function(escores, m)
 			B <- cbind(matrix(rep(0, a[i]*nrow(H)), ncol=a[i]), H)
 			B <- rbind(0, B)
 			H <- A + B
-			if (nrow(H) > m+1)
-				H <- H[1:(m+1), ]
-			if (ncol(H) > c+1)
-				H <- H[,1:(c+1)]
 		} else {
 			H <- H + H
 		}			
