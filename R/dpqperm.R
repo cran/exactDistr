@@ -1,109 +1,100 @@
 
-dperm <- function(x, scores, m)
+dperm <- function(x, scores, m, paired = NULL, fact = NULL)
 {
-	if (x < 0) return(0)
-	eq <- equiscores(scores)
-	cp <- cperm(eq, m)
-	
-	RVAL <- cp$Prob[cp$T == x[1]]
-	if (length(RVAL) == 0) RVAL <- 0
-	if (length(x) > 1)
-	{
-		for (i in c(2:length(x)))
-		{
-			pr <- cp$Prob[cp$T == x[i]]
-			if (length(pr) == 0) pr <- 0
-			RVAL <- c( RVAL, pr)
-		}
-	} 
-	if (is.null(RVAL)) RVAL <- rep(0, length(x))
-	return(RVAL) 
+    if (x < 0) return(0)
+    eq <- equiscores(scores, fact)
+    cp <- cperm(eq, m, paired)
+    RVAL <- rep(0, length(x))
+    RVAL[x %in% cp$T ] <- cp$Prob[cp$T %in% x]
+    return(RVAL) 
 }
 
-pperm <- function(q, scores, m)
+pperm <- function(q, scores, m, paired = NULL, fact = NULL)
 {
-	if (length(q) != 1) stop("q is not a real number")
-        if (q < 0) return(0)
-        eq <- equiscores(scores)
-        cp <- cperm(eq, m)
-	return(sum(cp$Prob[cp$T <= q]))
+    if (length(q) != 1) stop("q is not a real number")
+    if (q < 0) return(0)
+    eq <- equiscores(scores, fact)
+    cp <- cperm(eq, m, paired)
+    return(sum(cp$Prob[cp$T <= q]))
 }
 
-qperm <- function(p, scores, m)
+qperm <- function(p, scores, m, paired = NULL, fact = NULL)
 {
-	if (p < 0 || p > 1) stop("p is not a probability")
-	eq <- equiscores(scores)                          
-        cp <- cperm(eq, m)
-	return(max(cp$T[cumsum(cp$Prob) < p]) + 1)
+    if (p < 0 || p > 1) stop("p is not a probability")
+    eq <- equiscores(scores, fact)                          
+    cp <- cperm(eq, m)
+    cp$T[max(which(cumsum(cp$Prob) < p)) + 1]
 }
 
-equiscores <- function(scores)
+equiscores <- function(scores, fact=NULL)
 {
-	fscore <- scores - floor(scores)
-	
-	if (!all(fscore == 0)) 
-	{
-		if (all(fscore[fscore != 0] == 0.5))
-		{
-			factor <- 2
-			scores <- factor*scores
-		} else {
-			stop("midrank scores allowed only!")
-		}
-	} else { 
-		factor <- 1
-	}
+    fscore <- scores - floor(scores)
+    
+    if (all(fscore == 0))
+    { 
+        # integer valued scores
+        fact <- 1
+        add <- min(scores) - 1
+    } else {
+        if (all(fscore[fscore != 0] == 0.5))
+        {
+            # midranked scores
+            fact <- 2
+            scores <- scores*fact
+            add <- min(scores) - 1
+            scores <- scores - add
+        } else {
+            # rational scores
+            ssc <- sort(scores)
+            b <- 2/min(ssc[2:length(ssc)] - ssc[1:(length(ssc)-1)])
+            if (is.null(fact) || fact < b )
+            fact <- b
+            scores <- round(scores * fact)
+            add <- min(0, min(scores)-1)
+            scores <- scores - add
+        }
+    }
 
-	RVAL <- list(scores = scores, factor = factor)
-	class(RVAL) <- "equis"
-	return(RVAL)
+    RVAL <- list(scores = scores, fact = fact, add = add)
+    class(RVAL) <- "equis"
+    return(RVAL)
 }
 
 
-cperm <- function(escores, m)
+cperm <- function(escores, m, paired = NULL, fact = NULL)
 {
 
-	if (!(class(escores) == "equis"))
-		stop("scores are not of class equis") 
+    if (!(class(escores) == "equis"))
+        stop("scores are not of class equis") 
 
-	N <- length(escores$scores)
+    N <- length(escores$scores)
 
-	prob <- rep(0, max(cumsum(escores$scores)))
+    prob <- rep(0, max(cumsum(escores$scores)))
 
-	if (N == m) {
+    if (is.null(paired))
+        paired <- (N == m)
+    else 
+        paired <- (N == m) && paired  
 
-		# paired two sample situation
-
-		prob <- c(0, prob)
-
-		prob <- .C("cpermdist1", prob = as.double(prob), as.integer(escores$scores), as.integer(N))$prob
-
-		t <- which(prob != 0)
-		prob <- prob[t]
-
-		# 0 is possible
-		
-		t <- t - 1
-
-	} else {
-
-		# independent samples
-
-		col <- sum(sort(escores$scores)[(N + 1 - m):N])
-
-		scores <- rep(1, N)
-
-		prob <- .C("cpermdist2", prob = as.double(prob), as.integer(m),as.integer(col), as.integer(scores), as.integer(escores$scores), as.integer(N))$prob
-
-		t <- which(prob != 0)
-		prob <- prob[t]
-	}
-
-	t <- 1/escores$factor*t
-
-	RVAL <- list(T = t, Prob = prob)
-	class(RVAL) <- "cperm"
-	return(RVAL)
+    if (paired) {
+        # paired two sample situation
+        prob <- c(0, prob)
+        prob <- .C("cpermdist1", prob = as.double(prob), as.integer(escores$scores), as.integer(N))$prob
+        t <- which(prob != 0)
+        prob <- prob[t]
+        # 0 is possible
+	t <- t - 1
+    } else {
+        # independent samples
+        col <- sum(sort(escores$scores)[(N + 1 - m):N])
+        scores <- rep(1, N)
+        prob <- .C("cpermdist2", prob = as.double(prob), as.integer(m),as.integer(col), as.integer(scores), as.integer(escores$scores), as.integer(N))$prob
+        t <- which(prob != 0)
+        prob <- prob[t]
+    }
+    t <- (t + escores$add*m)/escores$fact
+    RVAL <- list(T = t, Prob = prob)
+    class(RVAL) <- "cperm"
+    return(RVAL)
 }
-
-	
+    

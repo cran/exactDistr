@@ -7,9 +7,9 @@ hansi <- c()
 seppl <- c()
 for (i in 1:10)
 {
-	m <- sample(10:100, 1)
+	m <- sample(10:50, 1)
 	if (runif(1) < 0.5)
-		n <- sample(10:100, 1)
+		n <- sample(10:50, 1)
 	else	
 		n <- m
 	score <- sample(n+m)
@@ -23,13 +23,16 @@ for (i in 1:10)
 
 cat("Max difference: ", max(abs(hansi - seppl)), "\n")
 
+if (max(abs(hansi - seppl)) > 1e-10) stop("difference pperm to big!")
+
+
 hansi <- c()
 seppl <- c()
 for (i in 1:10)
 {
-        m <- sample(10:100, 1)
+        m <- sample(10:50, 1)
         if (runif(1) < 0.5)
-                n <- sample(10:100, 1)
+                n <- sample(10:50, 1)
         else
                 n <- m
         score <- sample(n+m)
@@ -42,3 +45,5 @@ for (i in 1:10)
 }
 
 cat("Max difference: ", max(abs(hansi - seppl)), "\n")
+
+if (max(abs(hansi - seppl)) > 1e-10) stop("difference qperm to big!")

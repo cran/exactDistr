@@ -7,7 +7,7 @@ hansi <- c()
 seppl <- c()
 for (i in 1:10)
 {
-	m <- sample(10:100, 1)
+	m <- sample(10:50, 1)
 	score <- sample(m)
 	val <- sample(0:m, 1)
 	# cat("m: ", m, "n: ", n, " val: ", val, "\n")
@@ -19,11 +19,13 @@ for (i in 1:10)
 
 cat("Max difference: ", max(abs(hansi - seppl)), "\n")
 
+if (max(abs(hansi - seppl)) > 1e-10) stop("difference pperm to big!")
+
 hansi <- c()
 seppl <- c()
 for (i in 1:10)
 {
-        m <- sample(10:100, 1)
+        m <- sample(10:50, 1)
         score <- sample(m)
         prob <- runif(1)
         # cat("m: ", m, "n: ", n, " prob: ", prob, "\n")
@@ -34,3 +36,6 @@ for (i in 1:10)
 }
 
 cat("Max difference: ", max(abs(hansi - seppl)), "\n")
+
+if (max(abs(hansi - seppl)) > 1e-10) stop("difference qperm to big!")
+

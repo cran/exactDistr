@@ -178,18 +178,6 @@ void cpermdist2(double *x, int *m, int *c, int *score_a, int *score_b, int *N)
 				H[i][j] = H[i][j] + H[i - score_a[k]][j - score_b[k]];
 			}
 		}
-	
-		/* pretty printing 
-
-		for (i = 0; i <= s_a ; i++) {
-			for (j  = 0; j <= s_b  ; j++) {
-				Rprintf(" %d ", H[i][j]);
-			}
-			Rprintf(" \n");
-		}
-		Rprintf(" \n *********** \n")	;
-		
-		*/
 	}
 
 
@@ -200,6 +188,7 @@ void cpermdist2(double *x, int *m, int *c, int *score_a, int *score_b, int *N)
 	for (j = 0; j < sum_b; j++)
 	{
 		x[j] = H[*m][j+1];
+		// Rprintf(" %f, ", x[j]);
 		msum += x[j];
 	}
 	

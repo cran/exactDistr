@@ -7,9 +7,9 @@ for the distribution of Permutation Tests using the Shift-Algorithm by
 Streitberg and R\"ohmel.
 }
 \usage{
-dperm(x, scores, m)
-pperm(q, scores, m)
-qperm(p, scores, m)
+dperm(x, scores, m, paired=NULL, fact=NULL)
+pperm(q, scores, m, paired=NULL, fact=NULL)
+qperm(p, scores, m, paired=NULL, fact=NULL)
 }
 \arguments{
   \item{x, q}{ vector of quantiles }
@@ -18,6 +18,11 @@ qperm(p, scores, m)
 \code{m} elements) and \code{y} sample. }
   \item{m}{ sample size of the \code{x} sample. If \code{m = length(x)}
 scores of paired observations are assumed.}
+  \item{paired}{ logical. Indicates if paired observations are used. Only
+needed for the distribution of the total sum of the scores (which has mass 1
+at the point \code{sum(scores)}}
+  \item{fact}{ rational scores are mapped into integers by multiplication.
+Use \code{fact} instead of an internal factor.}
 }
 \details{
   The exact distribution of the sum of the first \code{m} scores is
@@ -44,7 +49,7 @@ hypothesis of exchangeability.
 \author{ Torsten Hothorn <Torsten.Hothorn@rzmail.uni-erlangen.de> }
 
 \examples{
-
+\dontrun{
 # exact p-value of the Wilcoxon test for a tied sample
 
 x <- c(0.5, 0.5, 0.6, 0.6, 0.7, 0.8, 0.9)
@@ -65,8 +70,8 @@ r <- rank(c(x,y))
 # exact distribution using Streitberg-Roehmel
 
 dwexac <- dperm((n*(n+1)/2):(n^2 + n*(n+1)/2), r, n)
-sum(dwexac)                             # should be something near 1 :-)
-
+su <- sum(dwexac)                             # should be something near 1 :-)
+if (su != 1) stop("dum(dwexac) not equal 1")
 
 # exact distribution using dwilcox
 
@@ -106,6 +111,31 @@ dab <- dansari(0:(n*(2*n+1)/2), n, n)
 # compare the two distributions:
 
 plot(dab[tr], dabexac[tr])
+
+
+# rational scores are allowed (but only result in an approximation)
+# e.g. v.d. Waeren test
+
+x <- rnorm(10)
+y <- rnorm(10)
+N <- length(x) + length(y)
+r <- rank(c(x,y))
+scores <- qnorm(r/(N+1))
+X <- sum(scores[seq(along=x)])  # <- v.d. Waeren normal quantile statistic
+
+# critical value, two-sided test
+abs(qperm(0.025, scores, length(x), fact=16))
+
+# p-values
+
+p <- pperm(abs(X), scores, length(x))
+min(p, 1-p)
+
+# check if [qp]wilcox and [pq]ansari are equal with [qp]perm
+
+source(system.file("test1.R", pkg="exactDistr"))
+source(system.file("test2.R", pkg="exactDistr"))
+}
 
 }
 \keyword{exact distribution}
