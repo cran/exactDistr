@@ -50,40 +50,50 @@ pexact <- pperm(sum(r[seq(along=x)]), r, 7)
  
 # Wilcoxon:
 
-x <- rnorm(10, 2)
-y <- rnorm(10, 3)
+n <- 10
+x <- rnorm(n, 2)
+y <- rnorm(n, 3)
 r <- rank(c(x,y))
 
 # exact distribution using Streitberg-Roehmel
 
-dwexac <- dperm(0:100, r, 10)
+dwexac <- dperm((n*(n+1)/2):(n^2 + n*(n+1)/2), r, n)
 sum(dwexac)                             # should be something near 1 :-)
-tr <- which(dwexac > 0)
+
+# talking about speed: n = 49
+# > system.time( dperm((n*(n+1)/2):(n^2 + n*(n+1)/2), r, n))
+# [1] 26.76  0.02 27.12  0.00  0.00
+# for Pentium III 450MHz, R-1.1.0, linux 2.2.14
 
 # exact distribution using dwilcox
 
-dw <- dwilcox(0:100, 10, 10)
+dw <- dwilcox(0:(n^2), n, n)
 
 # compare the two distributions:
 
-plot(dw[tr - 10*11/2], dwexac[tr])      # should give a "perfect" line
+plot(dw, dwexac)      # should give a "perfect" line
 
 # Ansari-Bradley
 
-x <- rnorm(10, 2, 1)
-y <- rnorm(10, 2, 2)
+n <- 10
+x <- rnorm(n, 2, 1)
+y <- rnorm(n, 2, 2)
 
 # exact distribution using Streitberg-Roehmel
 
 r <- rank(c(x,y))
-sc <- pmin(r, 20 - r +1)
-dabexac <- dperm(0:100, sc, 10)
+sc <- pmin(r, 2*n - r +1)
+dabexac <- dperm(0:(n*(2*n+1)/2), sc, n)
 sum(dabexac)
 tr <- which(dabexac > 0)
 
+# this ist faster for n = 49, why?
+# > system.time(dperm(0:(n*(2*n+1)/2), sc, n))
+# [1] 15.16  0.03 15.44  0.00  0.00
+
 # exact distribution using dansari (wrapper to ansari.c in ctest)
 
-dab <- dansari(0:100, 10, 10)
+dab <- dansari(0:(n*(2*n+1)/2), n, n)
 
 # compare the two distributions:
 
