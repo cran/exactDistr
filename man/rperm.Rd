@@ -1,5 +1,5 @@
-\name{dperm}
-\alias{dperm}
+\name{rperm}
+\alias{rperm}
 \title{Distribution of Permutation Tests}
 \description{
 Density, distribution function and quantile function 
@@ -86,6 +86,7 @@ just a one-line wrapper to \code{\link{sample}}.
 \author{ Torsten Hothorn <Torsten.Hothorn@rzmail.uni-erlangen.de> }
 
 \examples{
+\dontrun{
 
 # exact p-value of the Wilcoxon test for a tied sample
 
@@ -189,5 +190,6 @@ p1 - p2
 source(system.file("test1.R", pkg="exactDistr")[1])
 source(system.file("test2.R", pkg="exactDistr")[1])
 
+}
 }
 \keyword{exact distribution}

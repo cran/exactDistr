@@ -4,7 +4,7 @@
 \description{
  Internal exactDistr function
 }
-\usage{cperm(escores, m, paired = NULL, fact = NULL)
+\usage{cperm(escores, m, paired = NULL)
 }
 \details{
   This is not to be called by the user.

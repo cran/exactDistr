@@ -1,0 +1,20 @@
+#/bin/bash
+
+perl -pe 's/name\{dperm\}/name\{pperm\}/g;' < dperm.Rd > pperm.Rd
+perl -pe 's/alias\{dperm\}/alias\{pperm\}/g;' < pperm.Rd > dummy.Rd
+perl -pe 's/examples\{/examples\{\n\\dontrun\{/g;' < dummy.Rd > pperm.Rd
+perl -pe 's/\\keyword/\}\n\\keyword/g;' < pperm.Rd > dummy.Rd
+mv dummy.Rd pperm.Rd
+
+perl -pe 's/name\{dperm\}/name\{qperm\}/g;' < dperm.Rd > qperm.Rd
+perl -pe 's/alias\{dperm\}/alias\{qperm\}/g;' < qperm.Rd > dummy.Rd
+perl -pe 's/examples\{/examples\{\n\\dontrun\{/g;' < dummy.Rd > qperm.Rd
+perl -pe 's/\\keyword/\}\n\\keyword/g;' < qperm.Rd > dummy.Rd
+mv dummy.Rd qperm.Rd
+
+perl -pe 's/name\{dperm\}/name\{rperm\}/g;' < dperm.Rd > rperm.Rd
+perl -pe 's/alias\{dperm\}/alias\{rperm\}/g;' < rperm.Rd > dummy.Rd
+perl -pe 's/examples\{/examples\{\n\\dontrun\{/g;' < dummy.Rd > rperm.Rd
+perl -pe 's/\\keyword/\}\n\\keyword/g;' < rperm.Rd > dummy.Rd
+mv dummy.Rd rperm.Rd
+

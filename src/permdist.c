@@ -51,11 +51,11 @@ void cpermdist1(double *x, int *score_a, int *N)
 	*/ 
 
 	double *H; 
-	int i, j, k, sum_a = 0, s_a = 0;
+	int i, k, sum_a = 0, s_a = 0;
 	double msum = 0.0;
 
 	if (*N > PERM_MAX_N)
-		error("N > %d in cpermdistr", PERM_MAX_N); 
+		error("N > %d in cpermdistr1", PERM_MAX_N); 
 	
 	for (i = 0; i < *N; i++) 
 		sum_a += score_a[i];
@@ -66,7 +66,7 @@ void cpermdist1(double *x, int *score_a, int *N)
 
 	H = (double *) calloc(sum_a + 1, sizeof(double));
 	if (!H)
-		error("permdist2 allocation error %d", 1);
+		error("cpermdist1 allocation error %d", 1);
 	for (i = 0; i <= sum_a; i++)
 		H[i] = 0;
 		
@@ -110,7 +110,7 @@ void cpermdist1(double *x, int *score_a, int *N)
 
 }
 
-void cpermdist2(double *x, int *m, int *c, int *score_a, int *score_b, int *N)
+void cpermdist2(double *x, int *m, int *c, int *score_a, int *score_b, int *N, int *lenx)
 {
 	/*
 		compute the joint permutation distribution of the 
@@ -122,11 +122,11 @@ void cpermdist2(double *x, int *m, int *c, int *score_a, int *score_b, int *N)
 	*/ 
 
 	double **H; 
-	int i, j, k, sum_a = 0, sum_b = 0, s_a = 0, s_b = 0;
+	int i, j, k, z, sum_a = 0, sum_b = 0, s_a = 0, s_b = 0;
 	double msum = 0.0;
 
 	if (*N > PERM_MAX_N)
-		error("N > %d in cpermdistr", PERM_MAX_N); 
+		error("N > %d in cpermdistr2", PERM_MAX_N); 
 	
 	for (i = 0; i < *N; i++) {
 		sum_a += score_a[i];
@@ -146,11 +146,11 @@ void cpermdist2(double *x, int *m, int *c, int *score_a, int *score_b, int *N)
 
 	H = (double **) calloc(sum_a + 1, sizeof(double *));
 	if (!H)
-		error("permdist2 allocation error %d", 1);
+		error("cpermdist2 allocation error %d", 1);
 	for (i = 0; i <= sum_a; i++) {
 		H[i] = (double *) calloc(sum_b + 1, sizeof(double));
 		if (!H)
-			error("permdist2 allocation error %d", 2);
+			error("cpermdist2 allocation error %d", 2);
 		for (j = 0; j <= sum_b; j++)
 			H[i][j] = 0;
 	}
@@ -180,28 +180,42 @@ void cpermdist2(double *x, int *m, int *c, int *score_a, int *score_b, int *N)
 		}
 	}
 
-
-	/* 
-		get the values in row m and sum it up
-	*/
-
-	for (j = 0; j < sum_b; j++)
-	{
-		x[j] = H[*m][j+1];
-		// Rprintf(" %f, ", x[j]);
-		msum += x[j];
-	}
-	
 	/*
-		compute probabilities
-		note: x holds the probabilities and can be read from R.
-		[dpq] stuff is done in R
-
+		return the hole matrix H (not needed within exactDistr)
 	*/ 
+
+	if (*lenx > sum_b)
+	{
+		z = 0;
+		for (k = 0; k < *N; k++) {
+			for (j = 0; j < sum_b; j++) {
+				x[z] = H[k][j];
+				z++;
+			}
+		}
+	} else {	
+
+		/* 
+			get the values in row m and sum it up
+		*/
+
+		for (j = 0; j < sum_b; j++)
+		{
+			x[j] = H[*m][j+1];
+			msum += x[j];
+		}
 	
-	for (j = 0; j < sum_b; j++)
-		x[j] = x[j]/msum;
+		/*
+			compute probabilities
+			note: x holds the probabilities and can be read from R.
+			[dpq] stuff is done in R
+		*/ 
 	
+		for (j = 0; j < sum_b; j++)
+			x[j] = x[j]/msum;
+	
+	}
+		
 	/*
 		free memory and exit
 	*/

@@ -1,10 +1,10 @@
-\name{equiscores}
-\alias{equiscores}
+\name{toltest}
+\alias{toltest}
 \title{Internal exactDistr function}
 \description{
  Internal exactDistr function
 }
-\usage{equiscores(escores, tol = 0.01, fact = NULL)
+\usage{toltest(x, scores)
 }
 \details{
   This is not to be called by the user.

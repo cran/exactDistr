@@ -4,4 +4,6 @@ dperm                    Distribution of Permutation Tests
 equiscores               Internal exactDistr function
 pperm                    Distribution of Permutation Tests
 qperm                    Distribution of Permutation Tests
+rperm                    Distribution of Permutation Tests
+toltest                  Internal exactDistr function
 wilcox.exact             Wilcoxon Rank Sum and Signed Rank Tests

@@ -1,3 +1,15 @@
+	0.2-4 (05.12.2000)
+
+	typos fixed, system.file()[1] in examples 
+
+	0.2-3 (04.12.2000)
+
+	uhh, 0.2-2 was buggy :-(
+	bugs (hopefully) fixed, more intelligent determination of the
+	factor to multiply real (!) valued scores with. It is now possible
+	to give a maximum error by "tol" on the quantile scale. Default is 
+	tol = 0.01 which should be ok for most situations. 
+
 	0.2-2 (29.11.2000)
 
 	rational scores now possible -> this results in an approximation
