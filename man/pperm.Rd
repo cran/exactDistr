@@ -3,7 +3,7 @@
 \title{Distribution of Permutation Tests}
 \description{
 Density, distribution function and quantile function 
-for the distribution of the Permutation Tests using the Shift-Algorithm by
+for the distribution of Permutation Tests using the Shift-Algorithm by
 Streitberg and R\"ohmel.
 }
 \usage{
@@ -16,11 +16,13 @@ qperm(p, scores, m)
   \item{p}{vector of probabilities}
   \item{scores}{the (mid)ranks of the observations of the \code{x} (first
 \code{m} elements) and \code{y} sample. }
-  \item{m}{ sample size of the \code{x} sample }
+  \item{m}{ sample size of the \code{x} sample. If \code{m = length(x)}
+scores of paired observations are assumed.}
 }
 \details{
   The exact distribution of the sum of the first \code{m} scores is
-evaluated using the Shift-Algorithm by Streitberg and R\"ohmel.
+evaluated using the Shift-Algorithm by Streitberg and R\"ohmel under the
+hypothesis of exchangeability.
 }
 \value{
 \code{dperm} gives the density, \code{pperm} gives the distribution
@@ -33,6 +35,11 @@ evaluated using the Shift-Algorithm by Streitberg and R\"ohmel.
 	Exact Distributions For Permutations and Rank Tests: 
 	An Introduction to Some Recently Published Algorithms 
 	Statistical Software Letter, 12 No. 1, 10-17.
+
+	Bernd Streitberg and Joachim R\"ohmel (1987)
+	Exakte Verteilungen f\"ur Rang- und Randomisierungstests 
+	im allgemeinen $c$-Stichprobenfall
+	EDV in Medizin und Biologie, 18 No. 1, 12-19 
 }
 \author{ Torsten Hothorn <Torsten.Hothorn@rzmail.uni-erlangen.de> }
 
@@ -60,10 +67,6 @@ r <- rank(c(x,y))
 dwexac <- dperm((n*(n+1)/2):(n^2 + n*(n+1)/2), r, n)
 sum(dwexac)                             # should be something near 1 :-)
 
-# talking about speed: n = 49
-# > system.time( dperm((n*(n+1)/2):(n^2 + n*(n+1)/2), r, n))
-# [1] 26.76  0.02 27.12  0.00  0.00
-# for Pentium III 450MHz, R-1.1.0, linux 2.2.14
 
 # exact distribution using dwilcox
 
@@ -72,6 +75,15 @@ dw <- dwilcox(0:(n^2), n, n)
 # compare the two distributions:
 
 plot(dw, dwexac)      # should give a "perfect" line
+
+# Wilcoxon signed rank test
+
+x <- rnorm(10, 5)
+y <- rnorm(10, 5)
+r <- rank(abs(x - y))
+pperm(sum(r[x - y > 0]), r, length(r))
+wilcox.test(x,y, paired=T, alternative="less")
+psignrank(sum(r[x - y > 0]), length(r))
 
 # Ansari-Bradley
 
@@ -86,10 +98,6 @@ sc <- pmin(r, 2*n - r +1)
 dabexac <- dperm(0:(n*(2*n+1)/2), sc, n)
 sum(dabexac)
 tr <- which(dabexac > 0)
-
-# this ist faster for n = 49, why?
-# > system.time(dperm(0:(n*(2*n+1)/2), sc, n))
-# [1] 15.16  0.03 15.44  0.00  0.00
 
 # exact distribution using dansari (wrapper to ansari.c in ctest)
 

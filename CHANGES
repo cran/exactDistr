@@ -1,0 +1,20 @@
+
+	0.1-6 (22.10.2000)
+
+	hacked cpermdist in C, now computations a lot faster
+
+	0.1-7 (23.10.2000)
+
+	bug fixes (H as double), test.R in ./inst for testing with
+	[pq]wilcox
+
+	0.1-8 (24.10.2000)
+
+	added the paired sample situation, now ./inst/test1.R for the
+	comparison with [pq]signrank, ./inst/test2.R with  [pq]wilcox
+
+	0.1-9 (25.10.2000)
+
+	bugfixes for pperm(paired): 0 is a possible realization
+
+	

@@ -1,10 +1,9 @@
+
 dperm <- function(x, scores, m)
 {
 	if (x < 0) return(0)
 	eq <- equiscores(scores)
 	cp <- cperm(eq, m)
-	
-	# why does RVAL <- cp$Prob[cp$T == x] not work ???
 	
 	RVAL <- cp$Prob[cp$T == x[1]]
 	if (length(RVAL) == 0) RVAL <- 0
@@ -40,9 +39,10 @@ qperm <- function(p, scores, m)
 
 equiscores <- function(scores)
 {
-	if (!is.integer(scores)) 
+	fscore <- scores - floor(scores)
+	
+	if (!all(fscore == 0)) 
 	{
-		fscore <- scores - floor(scores)
 		if (all(fscore[fscore != 0] == 0.5))
 		{
 			factor <- 2
@@ -62,47 +62,44 @@ equiscores <- function(scores)
 
 cperm <- function(escores, m)
 {
+
 	if (!(class(escores) == "equis"))
 		stop("scores are not of class equis") 
 
-	# Shift algorithmus for the exact Wilcoxon distribution
-	# by B. Streitberg and J. Roehmel: Exact Distributions for
-	# Permutations and Rank Tests: An Introduction to Some Recently
-	# Published Algorithms, Statistical Software Newsletter 1984, 
-	# Vol. 12, No. 1, pp. 10-17
-	#   
-	# Is equal to dwilcox if scores are untied. 
-	# Can be extended to other rank tests by modificated scores
+	N <- length(escores$scores)
 
-	a <- escores$scores 
+	prob <- rep(0, max(cumsum(escores$scores)))
 
-	N <- length(a)
-	H <- matrix(1)
-	c <- sum(a[(m+1):N])
+	if (N == m) {
 
-	for (i in 1:N)
-	{
-		if (a[i] > 0)
-		{
-			A <- cbind(H, matrix(rep(0, a[i]*nrow(H)), ncol=a[i]))
-			A <- rbind(A, 0)
-			B <- cbind(matrix(rep(0, a[i]*nrow(H)), ncol=a[i]), H)
-			B <- rbind(0, B)
-			H <- A + B
-		} else {
-			H <- H + H
-		}			
+		# paired two sample situation
+
+		prob <- c(0, prob)
+
+		prob <- .C("cpermdist1", prob = as.double(prob), as.integer(escores$scores), as.integer(N))$prob
+
+		t <- which(prob != 0)
+		prob <- prob[t]
+
+		# 0 is possible
+		
+		t <- t - 1
+
+	} else {
+
+		# independent samples
+
+		col <- sum(sort(escores$scores)[(N + 1 - m):N])
+
+		scores <- rep(1, N)
+
+		prob <- .C("cpermdist2", prob = as.double(prob), as.integer(m),as.integer(col), as.integer(scores), as.integer(escores$scores), as.integer(N))$prob
+
+		t <- which(prob != 0)
+		prob <- prob[t]
 	}
-	prob <- H[m+1,]
-	t <- which(prob != 0)
-	prob <- prob[t]
-	fact <- gamma(m+1)*gamma(N -m +1)
-	fact <- fact/gamma(N+1)
-	prob <- fact*prob
-	t <- t - 1
-	t <- 1/escores$factor*t
 
-	# return the density P( T = t) = prob for all possible t
+	t <- 1/escores$factor*t
 
 	RVAL <- list(T = t, Prob = prob)
 	class(RVAL) <- "cperm"
